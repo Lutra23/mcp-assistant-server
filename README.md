@@ -55,14 +55,13 @@ npm install
 cp mcp-config.json.example mcp-config.json
 ```
 
-2. 根据需要修改 `mcp-config.json` 配置：
+2. 根据需要修改 `mcp-config.json` 配置，现在只支持硅基流动api调用：
 
 ```json
 {
   "port": 3000,
   "logLevel": "info",
   "llm": {
-    "provider": "openai",
     "apiKey": "your-api-key"
   }
 }
