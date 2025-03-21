@@ -1,6 +1,6 @@
 {
   "useLLM": true,
-  "llmApiKey": "sk-dylmvhohiwdslesflxnyvziknjvqqfuygagtnzradohykibh",
+  "llmApiKey": "your-api-key-here",
   "llmApiEndpoint": "https://api.siliconflow.cn/v1",
   "llmModelName": "Qwen/QwQ-32B",
   "llmMaxTokens": 1024,
@@ -94,6 +94,56 @@
       "name": "web_search",
       "description": "在网络上搜索信息",
       "capabilities": ["网络搜索"]
+    },
+    {
+      "name": "doc_generate",
+      "description": "生成文档和技术说明",
+      "capabilities": ["文档生成", "内容创作"]
+    },
+    {
+      "name": "code_test",
+      "description": "生成和执行代码测试",
+      "capabilities": ["代码测试", "质量保证"]
+    },
+    {
+      "name": "git_operation",
+      "description": "执行版本控制操作",
+      "capabilities": ["版本控制", "代码管理"]
+    },
+    {
+      "name": "ai_finetune",
+      "description": "管理AI模型微调过程",
+      "capabilities": ["模型训练", "AI优化"]
+    },
+    {
+      "name": "performance_monitor",
+      "description": "监控和分析系统性能",
+      "capabilities": ["性能监控", "资源优化"]
+    },
+    {
+      "name": "security_scan",
+      "description": "执行代码和系统安全扫描",
+      "capabilities": ["安全分析", "漏洞检测"]
+    },
+    {
+      "name": "translation",
+      "description": "翻译文本内容到不同语言",
+      "capabilities": ["语言翻译", "国际化"]
+    },
+    {
+      "name": "report_generate",
+      "description": "生成数据和分析报告",
+      "capabilities": ["报告生成", "数据可视化"]
+    },
+    {
+      "name": "visualization",
+      "description": "创建数据可视化和图表",
+      "capabilities": ["数据可视化", "图表生成"]
+    },
+    {
+      "name": "voice_process",
+      "description": "处理和分析语音数据",
+      "capabilities": ["语音处理", "音频分析"]
     }
   ]
 }
