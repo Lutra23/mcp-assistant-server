@@ -2,7 +2,7 @@
   "useLLM": true,
   "llmApiKey": "your-api-key-here",
   "llmApiEndpoint": "https://api.siliconflow.cn/v1",
-  "llmModelName": "deepseek-ai/DeepSeek-R1",
+  "llmModelName": "Qwen/QwQ-32B",
   "llmMaxTokens": 1024,
   "llmTemperature": 0.6,
   "server": {
@@ -10,41 +10,58 @@
     "host": "localhost",
     "logLevel": "info"
   },
+  "api": {
+    "enableSwaggerUI": true,
+    "basePath": "/api/v1",
+    "cors": {
+      "enabled": true,
+      "origins": ["*"]
+    }
+  },
+  "capabilities": {
+    "protocol": { 
+      "version": "0.1.0" 
+    },
+    "server": {
+      "name": "mcp-assistant-server",
+      "version": "1.0.0",
+      "supportedTransports": ["stdio", "socket"]
+    },
+    "tools": [
+      {
+        "name": "analyze_task",
+        "description": "分析任务并提取关键信息",
+        "capabilities": ["任务分析", "信息提取"]
+      },
+      {
+        "name": "recommend_tools",
+        "description": "推荐适用的工具",
+        "capabilities": ["工具推荐", "决策支持"]
+      },
+      {
+        "name": "update_context",
+        "description": "更新上下文信息",
+        "capabilities": ["上下文管理", "状态追踪"]
+      },
+      {
+        "name": "get_capabilities",
+        "description": "获取服务器支持的所有工具",
+        "capabilities": ["能力发现", "服务查询"]
+      },
+      {
+        "name": "llm_analyze",
+        "description": "使用大模型进行高级任务分析",
+        "capabilities": ["任务分析", "大模型", "高级分析"]
+      }
+    ]
+  },
   "externalServices": [
-    {
-      "name": "filesystem-mcp",
-      "description": "文件系统操作服务",
-      "endpoint": "http://localhost:3001",
-      "transport": "http",
-      "aliases": ["fs", "filesystem"]
-    },
-    {
-      "name": "github-mcp",
-      "description": "GitHub交互服务",
-      "endpoint": "http://localhost:3002",
-      "transport": "http",
-      "aliases": ["gh", "github"]
-    },
     {
       "name": "sequentialthinking-mcp",
       "description": "顺序思考服务",
       "endpoint": "stdio://npm:@modelcontextprotocol/server-sequential-thinking",
       "transport": "stdio",
       "aliases": ["thinking", "sequential-thinking"]
-    },
-    {
-      "name": "playwright-mcp",
-      "description": "浏览器自动化服务",
-      "endpoint": "stdio://path/to/playwright-mcp-server/index.js",
-      "transport": "stdio",
-      "aliases": ["browser", "pw"]
-    },
-    {
-      "name": "tools-mcp",
-      "description": "通用命令行工具服务",
-      "endpoint": "stdio://path/to/tools-mcp-server/index.js",
-      "transport": "stdio",
-      "aliases": ["tools", "cli"]
     }
   ],
   "defaultTools": [
@@ -69,16 +86,6 @@
       "capabilities": ["数据获取"]
     },
     {
-      "name": "data_transform",
-      "description": "转换和处理数据",
-      "capabilities": ["数据处理"]
-    },
-    {
-      "name": "content_search",
-      "description": "在内容中搜索信息",
-      "capabilities": ["内容搜索"]
-    },
-    {
       "name": "command_execute",
       "description": "执行系统命令",
       "capabilities": ["命令执行"]
@@ -89,24 +96,54 @@
       "capabilities": ["网络搜索"]
     },
     {
-      "name": "database_query",
-      "description": "查询数据库",
-      "capabilities": ["数据库操作"]
+      "name": "doc_generate",
+      "description": "生成文档和技术说明",
+      "capabilities": ["文档生成", "内容创作"]
     },
     {
-      "name": "image_process",
-      "description": "处理图像文件",
-      "capabilities": ["图像处理"]
+      "name": "code_test",
+      "description": "生成和执行代码测试",
+      "capabilities": ["代码测试", "质量保证"]
     },
     {
-      "name": "document_analyze",
-      "description": "分析文档内容",
-      "capabilities": ["文档分析"]
+      "name": "git_operation",
+      "description": "执行版本控制操作",
+      "capabilities": ["版本控制", "代码管理"]
     },
     {
-      "name": "api_call",
-      "description": "调用外部API",
-      "capabilities": ["API调用"]
+      "name": "ai_finetune",
+      "description": "管理AI模型微调过程",
+      "capabilities": ["模型训练", "AI优化"]
+    },
+    {
+      "name": "performance_monitor",
+      "description": "监控和分析系统性能",
+      "capabilities": ["性能监控", "资源优化"]
+    },
+    {
+      "name": "security_scan",
+      "description": "执行代码和系统安全扫描",
+      "capabilities": ["安全分析", "漏洞检测"]
+    },
+    {
+      "name": "translation",
+      "description": "翻译文本内容到不同语言",
+      "capabilities": ["语言翻译", "国际化"]
+    },
+    {
+      "name": "report_generate",
+      "description": "生成数据和分析报告",
+      "capabilities": ["报告生成", "数据可视化"]
+    },
+    {
+      "name": "visualization",
+      "description": "创建数据可视化和图表",
+      "capabilities": ["数据可视化", "图表生成"]
+    },
+    {
+      "name": "voice_process",
+      "description": "处理和分析语音数据",
+      "capabilities": ["语音处理", "音频分析"]
     }
   ]
-} 
+}
