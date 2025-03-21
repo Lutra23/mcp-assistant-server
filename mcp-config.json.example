@@ -1,0 +1,112 @@
+{
+  "useLLM": true,
+  "llmApiKey": "your-api-key-here",
+  "llmApiEndpoint": "https://api.siliconflow.cn/v1",
+  "llmModelName": "deepseek-ai/DeepSeek-R1",
+  "llmMaxTokens": 1024,
+  "llmTemperature": 0.6,
+  "server": {
+    "port": 3000,
+    "host": "localhost",
+    "logLevel": "info"
+  },
+  "externalServices": [
+    {
+      "name": "filesystem-mcp",
+      "description": "文件系统操作服务",
+      "endpoint": "http://localhost:3001",
+      "transport": "http",
+      "aliases": ["fs", "filesystem"]
+    },
+    {
+      "name": "github-mcp",
+      "description": "GitHub交互服务",
+      "endpoint": "http://localhost:3002",
+      "transport": "http",
+      "aliases": ["gh", "github"]
+    },
+    {
+      "name": "sequentialthinking-mcp",
+      "description": "顺序思考服务",
+      "endpoint": "stdio://npm:@modelcontextprotocol/server-sequential-thinking",
+      "transport": "stdio",
+      "aliases": ["thinking", "sequential-thinking"]
+    },
+    {
+      "name": "playwright-mcp",
+      "description": "浏览器自动化服务",
+      "endpoint": "stdio://path/to/playwright-mcp-server/index.js",
+      "transport": "stdio",
+      "aliases": ["browser", "pw"]
+    },
+    {
+      "name": "tools-mcp",
+      "description": "通用命令行工具服务",
+      "endpoint": "stdio://path/to/tools-mcp-server/index.js",
+      "transport": "stdio",
+      "aliases": ["tools", "cli"]
+    }
+  ],
+  "defaultTools": [
+    {
+      "name": "file_read",
+      "description": "读取文件内容",
+      "capabilities": ["文件读取"]
+    },
+    {
+      "name": "file_write",
+      "description": "写入文件内容",
+      "capabilities": ["文件写入"]
+    },
+    {
+      "name": "code_analyze",
+      "description": "分析代码结构和质量",
+      "capabilities": ["代码分析"]
+    },
+    {
+      "name": "data_fetch",
+      "description": "从外部源获取数据",
+      "capabilities": ["数据获取"]
+    },
+    {
+      "name": "data_transform",
+      "description": "转换和处理数据",
+      "capabilities": ["数据处理"]
+    },
+    {
+      "name": "content_search",
+      "description": "在内容中搜索信息",
+      "capabilities": ["内容搜索"]
+    },
+    {
+      "name": "command_execute",
+      "description": "执行系统命令",
+      "capabilities": ["命令执行"]
+    },
+    {
+      "name": "web_search",
+      "description": "在网络上搜索信息",
+      "capabilities": ["网络搜索"]
+    },
+    {
+      "name": "database_query",
+      "description": "查询数据库",
+      "capabilities": ["数据库操作"]
+    },
+    {
+      "name": "image_process",
+      "description": "处理图像文件",
+      "capabilities": ["图像处理"]
+    },
+    {
+      "name": "document_analyze",
+      "description": "分析文档内容",
+      "capabilities": ["文档分析"]
+    },
+    {
+      "name": "api_call",
+      "description": "调用外部API",
+      "capabilities": ["API调用"]
+    }
+  ]
+} 

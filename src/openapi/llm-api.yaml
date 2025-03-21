@@ -1,0 +1,303 @@
+openapi: 3.0.0
+info:
+  title: MCP大模型API
+  description: MCP Assistant Server的大模型API接口
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: API基础路径
+paths:
+  /llm/analyze-task:
+    post:
+      summary: 任务分析
+      description: 使用大模型分析任务，提取关键信息
+      operationId: analyzeTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - description
+              properties:
+                description:
+                  type: string
+                  description: 任务描述
+                context:
+                  type: string
+                  description: 上下文信息
+                analysisType:
+                  type: string
+                  description: 分析类型，可以是'basic'或'comprehensive'
+                  enum: [basic, comprehensive]
+      responses:
+        '200':
+          description: 成功分析任务
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskAnalysisResult'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 服务器错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /llm/recommend-tools:
+    post:
+      summary: 工具推荐
+      description: 基于任务和可用工具，推荐合适的工具组合
+      operationId: recommendTools
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - task
+                - availableTools
+              properties:
+                task:
+                  $ref: '#/components/schemas/Task'
+                availableTools:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/MCPTool'
+      responses:
+        '200':
+          description: 成功推荐工具
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolRecommendationResult'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 服务器错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /llm/config:
+    get:
+      summary: 获取LLM配置
+      description: 获取当前大模型服务的配置信息
+      operationId: getLLMConfig
+      responses:
+        '200':
+          description: 成功获取配置
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMConfig'
+    put:
+      summary: 更新LLM配置
+      description: 更新大模型服务的配置信息
+      operationId: updateLLMConfig
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LLMConfigUpdate'
+      responses:
+        '200':
+          description: 成功更新配置
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMConfig'
+        '400':
+          description: 请求参数错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /llm/health:
+    get:
+      summary: 服务健康检查
+      description: 检查大模型服务的健康状态
+      operationId: checkHealth
+      responses:
+        '200':
+          description: 服务正常
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                  message:
+                    type: string
+components:
+  schemas:
+    TaskAnalysisResult:
+      type: object
+      properties:
+        taskType:
+          type: string
+          description: 任务类型
+          enum: [FileOperation, CodeAnalysis, SystemOperation, DataProcessing, WebSearch, DatabaseOperation, APIInteraction, DocumentProcess, ImageProcess, NaturalLanguageProcess, Unknown]
+        keywords:
+          type: array
+          items:
+            type: string
+          description: 关键词列表
+        complexity:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: 复杂度评分（1-5）
+        entities:
+          type: array
+          items:
+            type: string
+          description: 识别的实体
+        subTasks:
+          type: array
+          items:
+            type: string
+          description: 子任务列表
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: 优先级（1-5）
+        estimatedDuration:
+          type: integer
+          description: 估计完成时间（秒）
+        domain:
+          type: string
+          description: 任务所属领域
+    Task:
+      type: object
+      required:
+        - description
+        - type
+        - keywords
+        - complexity
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [FileOperation, CodeAnalysis, SystemOperation, DataProcessing, WebSearch, DatabaseOperation, APIInteraction, DocumentProcess, ImageProcess, NaturalLanguageProcess, Unknown]
+        keywords:
+          type: array
+          items:
+            type: string
+        complexity:
+          type: integer
+          minimum: 1
+          maximum: 5
+        entities:
+          type: array
+          items:
+            type: string
+        subTasks:
+          type: array
+          items:
+            type: string
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 5
+        estimatedDuration:
+          type: integer
+        domain:
+          type: string
+    MCPTool:
+      type: object
+      required:
+        - name
+        - description
+        - capabilities
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+    ToolRecommendationResult:
+      type: object
+      properties:
+        recommendedTools:
+          type: array
+          items:
+            type: string
+          description: 推荐工具名称列表
+        sequence:
+          type: array
+          items:
+            type: string
+          description: 工具调用顺序
+        reasoning:
+          type: string
+          description: 推荐理由
+    LLMConfig:
+      type: object
+      properties:
+        apiEndpoint:
+          type: string
+          description: API端点URL
+        modelName:
+          type: string
+          description: 模型名称
+        maxTokens:
+          type: integer
+          description: 最大生成令牌数
+        temperature:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: 温度参数（0-1）
+        apiKeyAvailable:
+          type: boolean
+          description: API密钥是否可用
+    LLMConfigUpdate:
+      type: object
+      properties:
+        apiEndpoint:
+          type: string
+        modelName:
+          type: string
+        maxTokens:
+          type: integer
+          minimum: 1
+        temperature:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        apiKey:
+          type: string
+          description: API密钥（不会在响应中返回）
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object 

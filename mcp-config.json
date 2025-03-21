@@ -1,0 +1,99 @@
+{
+  "useLLM": true,
+  "llmApiKey": "sk-dylmvhohiwdslesflxnyvziknjvqqfuygagtnzradohykibh",
+  "llmApiEndpoint": "https://api.siliconflow.cn/v1",
+  "llmModelName": "Qwen/QwQ-32B",
+  "llmMaxTokens": 1024,
+  "llmTemperature": 0.6,
+  "server": {
+    "port": 3000,
+    "host": "localhost",
+    "logLevel": "info"
+  },
+  "api": {
+    "enableSwaggerUI": true,
+    "basePath": "/api/v1",
+    "cors": {
+      "enabled": true,
+      "origins": ["*"]
+    }
+  },
+  "capabilities": {
+    "protocol": { 
+      "version": "0.1.0" 
+    },
+    "server": {
+      "name": "mcp-assistant-server",
+      "version": "1.0.0",
+      "supportedTransports": ["stdio", "socket"]
+    },
+    "tools": [
+      {
+        "name": "analyze_task",
+        "description": "分析任务并提取关键信息",
+        "capabilities": ["任务分析", "信息提取"]
+      },
+      {
+        "name": "recommend_tools",
+        "description": "推荐适用的工具",
+        "capabilities": ["工具推荐", "决策支持"]
+      },
+      {
+        "name": "update_context",
+        "description": "更新上下文信息",
+        "capabilities": ["上下文管理", "状态追踪"]
+      },
+      {
+        "name": "get_capabilities",
+        "description": "获取服务器支持的所有工具",
+        "capabilities": ["能力发现", "服务查询"]
+      },
+      {
+        "name": "llm_analyze",
+        "description": "使用大模型进行高级任务分析",
+        "capabilities": ["任务分析", "大模型", "高级分析"]
+      }
+    ]
+  },
+  "externalServices": [
+    {
+      "name": "sequentialthinking-mcp",
+      "description": "顺序思考服务",
+      "endpoint": "stdio://npm:@modelcontextprotocol/server-sequential-thinking",
+      "transport": "stdio",
+      "aliases": ["thinking", "sequential-thinking"]
+    }
+  ],
+  "defaultTools": [
+    {
+      "name": "file_read",
+      "description": "读取文件内容",
+      "capabilities": ["文件读取"]
+    },
+    {
+      "name": "file_write",
+      "description": "写入文件内容",
+      "capabilities": ["文件写入"]
+    },
+    {
+      "name": "code_analyze",
+      "description": "分析代码结构和质量",
+      "capabilities": ["代码分析"]
+    },
+    {
+      "name": "data_fetch",
+      "description": "从外部源获取数据",
+      "capabilities": ["数据获取"]
+    },
+    {
+      "name": "command_execute",
+      "description": "执行系统命令",
+      "capabilities": ["命令执行"]
+    },
+    {
+      "name": "web_search",
+      "description": "在网络上搜索信息",
+      "capabilities": ["网络搜索"]
+    }
+  ]
+}

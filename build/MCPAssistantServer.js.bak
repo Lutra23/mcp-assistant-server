@@ -1,0 +1,227 @@
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
+import { DefaultTaskAnalyzer } from './core/TaskAnalyzer.js';
+import { DefaultToolRecommender } from './core/ToolRecommender.js';
+import { DefaultContextManager } from './core/ContextManager.js';
+export class MCPAssistantServer {
+    server;
+    taskAnalyzer;
+    toolRecommender;
+    contextManager;
+    context;
+    constructor() {
+        // 初始化MCP服务器配置
+        const serverConfig = {
+            name: 'mcp-assistant-server',
+            version: '1.0.0'
+        };
+        // 按照SDK定义的ServerCapabilities结构创建
+        const serverCapabilities = {
+            tools: {
+                analyze_task: {
+                    description: '分析任务并提取关键信息',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {
+                            description: { type: 'string' }
+                        },
+                        required: ['description']
+                    }
+                },
+                recommend_tools: {
+                    description: '为任务推荐合适的MCP工具',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {
+                            task: { type: 'object' }
+                        },
+                        required: ['task']
+                    }
+                },
+                update_context: {
+                    description: '更新任务执行上下文',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {
+                            result: { type: 'object' }
+                        },
+                        required: ['result']
+                    }
+                }
+            }
+        };
+        this.server = new Server(serverConfig, serverCapabilities);
+        // 初始化组件服务器
+        const geminiConfig = {
+            name: 'gemini-thinking',
+            version: '1.0.0'
+        };
+        const geminiCapabilities = {
+            tools: {
+                geminithinking: {
+                    description: '使用Gemini进行分析和推理',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {
+                            query: { type: 'string' },
+                            thoughtNumber: { type: 'number' },
+                            totalThoughts: { type: 'number' },
+                            nextThoughtNeeded: { type: 'boolean' }
+                        },
+                        required: ['query', 'thoughtNumber', 'totalThoughts']
+                    }
+                }
+            }
+        };
+        const geminiServer = new Server(geminiConfig, geminiCapabilities);
+        const memoryConfig = {
+            name: 'memory-mcp',
+            version: '1.0.0'
+        };
+        const memoryCapabilities = {
+            tools: {
+                search_nodes: {
+                    description: '搜索知识图谱节点',
+                    inputSchema: {
+                        type: 'object',
+                        properties: {
+                            query: { type: 'string' }
+                        },
+                        required: ['query']
+                    }
+                }
+            }
+        };
+        const memoryServer = new Server(memoryConfig, memoryCapabilities);
+        this.taskAnalyzer = new DefaultTaskAnalyzer(geminiServer, memoryServer);
+        this.toolRecommender = new DefaultToolRecommender(geminiServer, memoryServer);
+        this.contextManager = new DefaultContextManager(memoryServer);
+        // 初始化上下文
+        this.context = this.createInitialContext();
+        // 设置请求处理器
+        this.setupRequestHandlers();
+    }
+    createInitialContext() {
+        const env = {
+            workingDirectory: process.cwd(),
+            availableTools: [],
+            systemInfo: {
+                os: process.platform,
+                shell: process.env.SHELL || ''
+            }
+        };
+        return {
+            currentTask: null,
+            history: [],
+            environment: env
+        };
+    }
+    setupRequestHandlers() {
+        // 处理任务分析请求
+        const analyzeTaskSchema = z.object({
+            method: z.literal('analyze_task'),
+            params: z.object({
+                description: z.string()
+            })
+        });
+        this.server.setRequestHandler('analyze_task', async (request) => {
+            try {
+                console.log('收到analyze_task请求:', JSON.stringify(request, null, 2));
+                // 仍然使用Zod进行验证
+                analyzeTaskSchema.parse(request);
+                const task = await this.taskAnalyzer.analyzeTask(request.params?.description || '');
+                this.context.currentTask = task;
+                return {
+                    method: 'analyze_task',
+                    params: { task },
+                    _meta: {}
+                };
+            }
+            catch (error) {
+                console.error('处理analyze_task请求失败:', error);
+                throw error;
+            }
+        });
+        // 处理工具推荐请求
+        const recommendToolsSchema = z.object({
+            method: z.literal('recommend_tools'),
+            params: z.object({
+                task: z.object({}).passthrough()
+            })
+        });
+        this.server.setRequestHandler('recommend_tools', async (request) => {
+            try {
+                console.log('收到recommend_tools请求:', JSON.stringify(request, null, 2));
+                // 仍然使用Zod进行验证
+                recommendToolsSchema.parse(request);
+                if (!request.params?.task) {
+                    throw new Error('Task is required');
+                }
+                const recommendation = await this.toolRecommender.recommendTools(request.params.task, this.context);
+                return {
+                    method: 'recommend_tools',
+                    params: { recommendation },
+                    _meta: {}
+                };
+            }
+            catch (error) {
+                console.error('处理recommend_tools请求失败:', error);
+                throw error;
+            }
+        });
+        // 处理上下文更新请求
+        const updateContextSchema = z.object({
+            method: z.literal('update_context'),
+            params: z.object({
+                result: z.object({}).passthrough()
+            })
+        });
+        this.server.setRequestHandler('update_context', async (request) => {
+            try {
+                console.log('收到update_context请求:', JSON.stringify(request, null, 2));
+                // 仍然使用Zod进行验证
+                updateContextSchema.parse(request);
+                if (!request.params?.result) {
+                    throw new Error('Result is required');
+                }
+                this.context = await this.contextManager.updateContext(this.context, request.params.result);
+                return {
+                    method: 'update_context',
+                    params: { context: this.context },
+                    _meta: {}
+                };
+            }
+            catch (error) {
+                console.error('处理update_context请求失败:', error);
+                throw error;
+            }
+        });
+        // 错误处理
+        this.server.onerror = (error) => {
+            console.error('[MCP Assistant Server Error]', error);
+        };
+    }
+    async start() {
+        try {
+            const transport = new StdioServerTransport();
+            await this.server.connect(transport);
+            console.log('[MCP Assistant Server] Started successfully');
+        }
+        catch (error) {
+            console.error('[MCP Assistant Server] Failed to start:', error);
+            throw error;
+        }
+    }
+    async stop() {
+        try {
+            await this.server.close();
+            console.log('[MCP Assistant Server] Stopped successfully');
+        }
+        catch (error) {
+            console.error('[MCP Assistant Server] Failed to stop:', error);
+            throw error;
+        }
+    }
+}
+//# sourceMappingURL=MCPAssistantServer.js.map
