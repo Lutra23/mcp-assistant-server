@@ -1,216 +1,192 @@
+<div align="center">
+
 # MCP Assistant Server
 
-MCP Assistant Server是一个基于Model Context Protocol的智能助手服务器，提供任务分析、工具推荐、上下文管理等功能。
+<p align="center">
+  <img src="docs/images/logo.png" alt="MCP Assistant Server Logo" width="200"/>
+</p>
 
-## 功能特点
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D%2016.0.0-brightgreen)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-- **任务分析**：分析用户任务，提取关键词、任务类型、复杂度等信息
-- **工具推荐**：根据任务特点推荐最合适的工具
-- **上下文管理**：维护任务上下文，记录工具使用历史
-- **大模型支持**：可选接入大型语言模型，提供更准确的任务分析和工具推荐
-- **MCP服务发现**：自动发现并集成环境中的其他MCP服务和工具
+_🤖 一个强大的 MCP 服务器，提供智能任务分析和工具推荐功能_
 
-## 安装
+[English](./README_EN.md) | 简体中文
+
+</div>
+
+## ✨ 特性
+
+- 🎯 **智能任务分析** - 自动分析用户任务，提取关键信息
+- 🔍 **工具推荐** - 基于任务特点智能推荐最适合的 MCP 工具
+- 🧠 **LLM 集成** - 集成大语言模型进行高级分析
+- 🔄 **上下文管理** - 智能维护任务执行过程中的上下文信息
+- 🔌 **工具发现** - 自动发现和集成可用的 MCP 工具
+- 🚀 **高性能** - 异步处理，快速响应
+- 📦 **易扩展** - 模块化设计，便于扩展
+
+## 🚀 快速开始
+
+### 环境要求
+
+- Node.js >= 16.0.0
+- npm >= 7.0.0
+
+### 安装
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/mcp-assistant-server.git
+git clone https://github.com/Lutra23/mcp-assistant-server.git
+
+# 进入项目目录
 cd mcp-assistant-server
 
 # 安装依赖
 npm install
-
-# 构建项目
-npm run build
 ```
 
-## 配置
+### 配置
 
-### 环境变量
+1. 复制配置文件模板：
 
-- `USE_LLM`: 是否启用大模型支持 (true/false)
-- `LLM_API_KEY`: 大模型API密钥
-- `LLM_API_ENDPOINT`: 大模型API端点 (默认: https://api.openai.com/v1)
-- `LLM_MODEL_NAME`: 大模型名称 (默认: gpt-3.5-turbo)
-- `LLM_MAX_TOKENS`: 最大生成的token数 (默认: 1024)
-- `LLM_TEMPERATURE`: 生成温度 (默认: 0.7)
-- `NODE_ENV`: 环境类型 (development/production)
+```bash
+cp mcp-config.json.example mcp-config.json
+```
 
-### 配置文件
-
-创建`mcp-config.json`文件（参考`mcp-config.json.example`）：
+2. 根据需要修改 `mcp-config.json` 配置：
 
 ```json
 {
-  "useLLM": true,
-  "llmApiKey": "your-api-key-here",
-  "llmApiEndpoint": "https://api.openai.com/v1",
-  "llmModelName": "gpt-3.5-turbo",
-  "llmMaxTokens": 1024,
-  "llmTemperature": 0.7,
-  "server": {
-    "port": 3000,
-    "host": "localhost",
-    "logLevel": "info"
-  },
-  "externalServices": [
-    {
-      "name": "filesystem-mcp",
-      "description": "文件系统操作服务",
-      "endpoint": "http://localhost:3001",
-      "transport": "http"
-    }
-  ]
+  "port": 3000,
+  "logLevel": "info",
+  "llm": {
+    "provider": "openai",
+    "apiKey": "your-api-key"
+  }
 }
 ```
 
-## 使用方法
-
-### 启动服务器
+### 运行
 
 ```bash
-# 不使用大模型启动
+# 开发模式
+npm run dev
+
+# 生产模式
+npm run build
 npm start
-
-# 使用大模型启动
-USE_LLM=true LLM_API_KEY=your-api-key npm start
 ```
 
-### 使用StdioTransport连接
+## 📚 使用指南
 
-客户端可以通过stdio与服务器通信：
+### 基础用法
 
-```javascript
-import { Client } from '@modelcontextprotocol/sdk/client';
-import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio';
+```typescript
+import { MCPAssistantServer } from 'mcp-assistant-server';
 
-const transport = new StdioClientTransport({ 
-  command: 'node build/index.js'
+const server = new MCPAssistantServer({
+  port: 3000,
+  logLevel: 'info'
 });
-const client = new Client(transport);
 
-// 初始化
-await client.initialize();
+server.start();
+```
 
-// 使用工具
-const result = await client.callTool('analyze_task', {
-  description: '创建一个简单的网页，包含一个标题和一个按钮'
+### 示例
+
+1. 任务分析：
+
+```typescript
+const result = await server.analyzeTask({
+  description: '获取天气信息并保存到文件',
+  context: {
+    location: '上海',
+    format: 'json'
+  }
 });
 ```
 
-## API参考
+2. 工具推荐：
 
-### 核心工具
+```typescript
+const tools = await server.recommendTools({
+  taskId: 'task-123',
+  useHybridRecommendation: true
+});
+```
 
-#### analyze_task
+## 🎯 核心功能
 
-分析任务并提取关键信息。
+### 任务分析器
 
-**输入**:
-- `description` (string): 任务描述
-- `context` (string, 可选): 上下文信息
+分析用户输入的任务描述，提取关键信息：
 
-**输出**:
-- `taskId`: 任务ID
-- `task`: 任务详情，包括类型、关键词、复杂度等
+- 任务类型识别
+- 参数提取
+- 上下文关联
+- 依赖分析
 
-#### recommend_tools
+### 工具推荐系统
 
-根据任务推荐适用的工具。
+根据任务特点智能推荐工具：
 
-**输入**:
-- `taskId` (string): 任务ID
-- `useHybridRecommendation` (boolean, 可选): 是否使用混合推荐
+- 基于规则的推荐
+- 混合推荐算法
+- 上下文感知
+- 历史数据分析
 
-**输出**:
-- `recommendation`: 推荐的工具列表及理由
+### 上下文管理器
 
-#### update_context
+维护任务执行过程中的上下文信息：
 
-更新任务上下文。
+- 状态追踪
+- 数据持久化
+- 会话管理
+- 错误恢复
 
-**输入**:
-- `taskId` (string): 任务ID
-- `toolUsage` (object, 可选): 工具使用记录
-- `feedback` (string, 可选): 用户反馈
+## 📦 项目结构
 
-**输出**:
-- `context`: 更新后的上下文
+```
+src/
+├── controllers/     # 控制器层
+│   └── LLMApiController.ts
+├── core/           # 核心功能实现
+│   ├── TaskAnalyzer.ts
+│   ├── ToolRecommender.ts
+│   └── ContextManager.ts
+├── services/       # 服务层
+│   ├── LLMService.ts
+│   └── MCPDiscoveryService.ts
+├── routes/         # 路由定义
+│   └── llmApiRoutes.ts
+└── types/          # 类型定义
+    └── interfaces.ts
+```
 
-#### get_capabilities
+## 🔌 API 文档
 
-获取服务器支持的所有工具。
+详细的 API 文档请查看 [API 文档](./docs/api.md)。
 
-**输入**: 无
+## 🤝 贡献指南
 
-**输出**:
-- `tools`: 工具列表
+我们欢迎所有形式的贡献，无论是新功能、文档改进还是问题反馈。详情请查看 [贡献指南](CONTRIBUTING.md)。
 
-#### llm_analyze
+## 📄 更新日志
 
-使用大模型进行高级任务分析。
+查看 [CHANGELOG.md](CHANGELOG.md) 了解详细的更新历史。
 
-**输入**:
-- `description` (string): 任务描述
-- `context` (string, 可选): 上下文信息
-- `analysisType` (string, 可选): 分析类型
+## 📝 开源协议
 
-**输出**:
-- 分析结果对象
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 了解详情。
 
-### MCP服务发现工具
+## 🙏 致谢
 
-#### discover_mcp_tools
+感谢所有为这个项目做出贡献的开发者们！
 
-发现并列出所有可用的MCP工具。
+<div align="center">
 
-**输入**:
-- `refresh` (boolean, 可选): 是否刷新工具列表
+Made with ❤️ by [Lutra23](https://github.com/Lutra23)
 
-**输出**:
-- `externalTools`: 发现的外部工具列表
-- `count`: 工具数量
-
-#### call_external_tool
-
-调用外部MCP服务的工具。
-
-**输入**:
-- `toolName` (string): 工具名称
-- `serviceName` (string): 服务名称
-- `params` (object): 调用参数
-
-**输出**:
-- 工具执行结果
-
-## MCP服务集成
-
-MCP Assistant Server可以集成环境中的其他MCP服务，实现工具的自动发现和调用。服务发现通过以下方式进行：
-
-1. **服务注册表**：检查`~/.mcp/services/registry.json`文件
-2. **进程发现**：自动检测运行中的MCP服务进程
-3. **配置文件**：从`mcp-config.json`的`externalServices`配置项读取
-
-发现的服务可以通过`discover_mcp_tools`工具列出，并通过`call_external_tool`工具调用。
-
-### 注册新服务
-
-可以通过以下方式注册新的MCP服务：
-
-1. 在`mcp-config.json`的`externalServices`数组中添加服务信息
-2. 手动修改`~/.mcp/services/registry.json`文件
-3. 使用`registerLocalService` API注册服务
-
-## 贡献指南
-
-欢迎贡献代码、报告问题或提出改进建议。请遵循以下步骤：
-
-1. Fork仓库
-2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 创建Pull Request
-
-## 授权协议
-
-本项目基于MIT协议开源 - 详见 [LICENSE](LICENSE) 文件 
+</div>
