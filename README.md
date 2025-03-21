@@ -79,41 +79,127 @@ npm run build
 npm start
 ```
 
-## 📚 使用指南
+## 📚 在 Cline 中使用
 
-### 基础用法
+### 配置 MCP 服务器
 
-```typescript
-import { MCPAssistantServer } from 'mcp-assistant-server';
+1. 打开 Cline 的 MCP 设置文件：
+```bash
+# Linux/WSL
+~/.vscode-server/data/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json
 
-const server = new MCPAssistantServer({
-  port: 3000,
-  logLevel: 'info'
-});
+# macOS
+~/Library/Application Support/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json
 
-server.start();
+# Windows
+%APPDATA%\Code\User\globalStorage\rooveterinaryinc.roo-cline\settings\cline_mcp_settings.json
 ```
 
-### 示例
+2. 添加服务器配置：
+```json
+{
+  "mcpServers": {
+    "assistant": {
+      "command": "node",
+      "args": ["/path/to/mcp-assistant-server/build/index.js"],
+      "env": {
+        "PORT": "3000",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
 
-1. 任务分析：
+### 使用示例
+
+在 Cline 中，你可以使用以下工具：
 
 ```typescript
-const result = await server.analyzeTask({
-  description: '获取天气信息并保存到文件',
+// 分析任务
+<use_mcp_tool>
+<server_name>assistant</server_name>
+<tool_name>analyze_task</tool_name>
+<arguments>
+{
+  "description": "获取天气信息并保存到文件",
+  "context": {
+    "location": "上海",
+    "format": "json"
+  }
+}
+</arguments>
+</use_mcp_tool>
+
+// 推荐工具
+<use_mcp_tool>
+<server_name>assistant</server_name>
+<tool_name>recommend_tools</tool_name>
+<arguments>
+{
+  "taskId": "task-123",
+  "useHybridRecommendation": true
+}
+</arguments>
+</use_mcp_tool>
+```
+
+## 📚 在 Cursor 中使用
+
+### 配置 MCP 服务器
+
+1. 打开 Cursor 的配置文件：
+```bash
+# Linux
+~/.cursor/cursor_config.json
+
+# macOS
+~/Library/Application Support/Cursor/cursor_config.json
+
+# Windows
+%APPDATA%\Cursor\cursor_config.json
+```
+
+2. 添加 MCP 服务器配置：
+```json
+{
+  "mcpServers": {
+    "assistant": {
+      "command": "node",
+      "args": ["/path/to/mcp-assistant-server/build/index.js"],
+      "env": {
+        "PORT": "3000",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
+
+### 使用方式
+
+在 Cursor 中，你可以通过命令面板（Cmd/Ctrl + Shift + P）使用以下命令：
+
+1. `MCP: 分析任务` - 分析当前选中的代码或文本
+2. `MCP: 推荐工具` - 获取针对当前任务的工具推荐
+3. `MCP: 更新上下文` - 更新任务上下文信息
+
+也可以通过 Cursor API 在插件中使用：
+
+```typescript
+import { workspace } from 'cursor';
+
+// 分析任务
+const analysis = await workspace.mcp.callTool('assistant', 'analyze_task', {
+  description: '当前任务描述',
   context: {
-    location: '上海',
-    format: 'json'
+    // 上下文信息
   }
 });
-```
 
-2. 工具推荐：
-
-```typescript
-const tools = await server.recommendTools({
-  taskId: 'task-123',
-  useHybridRecommendation: true
+// 获取工具推荐
+const recommendations = await workspace.mcp.callTool('assistant', 'recommend_tools', {
+  taskId: 'current-task-id'
 });
 ```
 
